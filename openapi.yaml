@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: whatstrending.ai API
+  description: >
+    Free, no-auth REST API for real-time AI news, AI model rankings, and trending
+    AI tools. No API key required. Powered by whatstrending.ai.
+  version: "1.0.0"
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  contact:
+    name: whatstrending.ai
+    url: https://whatstrending.ai
+servers:
+  - url: https://whatstrending.ai
+    description: Production
+paths:
+  /api/articles:
+    get:
+      summary: List AI news articles
+      operationId: listArticles
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+          description: Filter by category (e.g. Industry, Tools, Research, Startups, Regulation, Models)
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 50 }
+        - name: offset
+          in: query
+          required: false
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: A list of articles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Article" }
+  /api/articles/{slug}:
+    get:
+      summary: Get a single article by slug
+      operationId: getArticle
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: One article
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: "#/components/schemas/Article" }
+        "404":
+          description: Article not found
+  /api/models:
+    get:
+      summary: AI model leaderboard
+      operationId: listModels
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Ranked AI models
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Model" }
+  /api/most-read:
+    get:
+      summary: Most-read articles
+      operationId: mostRead
+      responses:
+        "200":
+          description: Most-read article slugs with view counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        slug: { type: string }
+                        views: { type: integer }
+  /api/awesome-data:
+    get:
+      summary: Trending AI tools
+      operationId: awesomeData
+      responses:
+        "200":
+          description: Curated AI tools list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generatedAt: { type: string, format: date-time }
+                  site: { type: string }
+                  tools:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name: { type: string }
+                        tagline: { type: string }
+                        description: { type: string }
+components:
+  schemas:
+    Article:
+      type: object
+      properties:
+        title: { type: string }
+        originalTitle: { type: string }
+        slug: { type: string }
+        link: { type: string, format: uri }
+        source: { type: string }
+        category: { type: string }
+        date: { type: string, description: "RFC 2822 date string" }
+        summary: { type: string }
+        sourceType: { type: string }
+    Model:
+      type: object
+      properties:
+        rank: { type: integer }
+        name: { type: string }
+        provider: { type: string }
+        score: { type: integer }
+        pricing: { type: string }
+        context: { type: string }
+        category: { type: string }
+        change: { type: string }
+        or: { type: string, description: "OpenRouter model id" }
