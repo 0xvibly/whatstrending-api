@@ -66,6 +66,13 @@ paths:
                   data: { $ref: "#/components/schemas/Article" }
         "404":
           description: Article not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  error: { type: string, example: "Article not found" }
   /api/models:
     get:
       summary: AI model leaderboard
@@ -87,6 +94,40 @@ paths:
                   data:
                     type: array
                     items: { $ref: "#/components/schemas/Model" }
+  /api/models/{id}:
+    get:
+      summary: Get a single model by id
+      description: >
+        Look up one model by its slugified name. The `id` is the model name
+        lowercased with spaces replaced by hyphens (e.g. "DeepSeek V4 Flash" ->
+        "deepseek-v4-flash"). It is NOT the `or`/OpenRouter id, which contains a
+        slash and will not match.
+      operationId: getModel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Slugified model name (lowercase, spaces -> hyphens), e.g. deepseek-v4-flash
+          schema: { type: string }
+      responses:
+        "200":
+          description: One model
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: "#/components/schemas/Model" }
+        "404":
+          description: Model not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean, example: false }
+                  error: { type: string, example: "Model not found" }
   /api/most-read:
     get:
       summary: Most-read articles
@@ -109,11 +150,14 @@ paths:
                         views: { type: integer }
   /api/awesome-data:
     get:
-      summary: Trending AI tools
+      summary: Trending AI tools, comparisons & models
+      description: >
+        Returns three collections directly (not the { success, data } envelope):
+        curated tools, head-to-head comparisons, and the model leaderboard.
       operationId: awesomeData
       responses:
         "200":
-          description: Curated AI tools list
+          description: Curated AI tools, comparisons, and models
           content:
             application/json:
               schema:
@@ -123,12 +167,13 @@ paths:
                   site: { type: string }
                   tools:
                     type: array
-                    items:
-                      type: object
-                      properties:
-                        name: { type: string }
-                        tagline: { type: string }
-                        description: { type: string }
+                    items: { $ref: "#/components/schemas/Tool" }
+                  comparisons:
+                    type: array
+                    items: { $ref: "#/components/schemas/Comparison" }
+                  models:
+                    type: array
+                    items: { $ref: "#/components/schemas/Model" }
 components:
   schemas:
     Article:
@@ -140,18 +185,51 @@ components:
         link: { type: string, format: uri }
         source: { type: string }
         category: { type: string }
-        date: { type: string, description: "RFC 2822 date string" }
-        summary: { type: string }
+        date:
+          type: string
+          description: >
+            Publication date passed through from the source feed. May be ISO 8601
+            (e.g. 2026-06-20T14:46:48-04:00) or RFC 2822
+            (e.g. Sat, 20 Jun 2026 16:39:57 +0000) depending on the source.
         sourceType: { type: string }
+        summary: { type: string }
+        coverage:
+          type: number
+          description: How widely the story is being reported (higher = more coverage)
+        trendScore:
+          type: number
+          description: How fast the story is trending
+        sources:
+          type: array
+          description: Publication names covering the story
+          items: { type: string }
     Model:
       type: object
       properties:
         rank: { type: integer }
         name: { type: string }
         provider: { type: string }
-        score: { type: integer }
-        pricing: { type: string }
+        score: { type: integer, description: "Usage score (e.g. trailing token volume)" }
+        scoreDisplay: { type: string, description: "Human-readable score, e.g. \"4.68T\"" }
+        tokens: { type: integer, format: int64, description: "Token volume routed to the model" }
+        requests: { type: integer, format: int64, description: "Request count routed to the model" }
+        pricing: { type: string, description: "$in/$out per million tokens" }
         context: { type: string }
         category: { type: string }
         change: { type: string }
         or: { type: string, description: "OpenRouter model id" }
+    Tool:
+      type: object
+      properties:
+        name: { type: string }
+        tagline: { type: string }
+        description: { type: string }
+        url: { type: string, format: uri }
+        category: { type: string }
+        pricing: { type: string, description: "e.g. free, freemium, paid" }
+    Comparison:
+      type: object
+      properties:
+        a: { type: string, description: "First tool/model in the comparison" }
+        b: { type: string, description: "Second tool/model in the comparison" }
+        slug: { type: string, description: "Comparison page slug, e.g. chatgpt-vs-claude" }

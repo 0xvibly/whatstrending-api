@@ -55,21 +55,26 @@ curl "https://whatstrending.ai/api/articles?category=Tools&limit=2"
   "success": true,
   "data": [
     {
-      "title": "OpenAI Snags Google AI Pioneer Noam Shazeer Ahead of IPO Push",
-      "originalTitle": "OpenAI is bringing on some big guns in the lead-up to its IPO",
-      "slug": "openai-is-bringing-on-some-big-guns-in-the-lead-up-to-its-ipo",
-      "link": "https://techcrunch.com/2026/06/18/...",
-      "source": "TechCrunch",
-      "category": "Industry",
-      "date": "Thu, 18 Jun 2026 19:59:22 +0000",
-      "summary": "OpenAI is making two high-profile hires as it prepares for an IPO...",
-      "sourceType": "full"
+      "title": "The Atlantic created a searchable database of the music used to train AI",
+      "originalTitle": "The Atlantic created a searchable database of the music used to train AI",
+      "slug": "the-atlantic-created-a-searchable-database-of-the-music-used-to-train-ai",
+      "link": "https://www.theverge.com/ai-artificial-intelligence/953183/the-atlantic-searchable-database-music-ai-training-data",
+      "source": "The Verge",
+      "category": "Tools",
+      "date": "2026-06-20T14:46:48-04:00",
+      "sourceType": "full",
+      "summary": "Atlantic reporter Alex Reisner uncovered four datasets of music being used to train AI models and made them fully searchable for the public...",
+      "coverage": 1,
+      "trendScore": 1,
+      "sources": ["The Verge"]
     }
   ]
 }
 ```
 
-**Categories** are dynamic and reflect current coverage — commonly `Industry`, `Tools`, `Research`, `Startups`, `Regulation`, `Models`.
+Each item also carries `coverage` and `trendScore` (numbers indicating how widely the story is being reported and how fast it's trending) and `sources` (array of publication names covering the story). The `date` field is passed through from the source feed, so it may be ISO 8601 (`2026-06-20T14:46:48-04:00`) or RFC 2822 (`Sat, 20 Jun 2026 16:39:57 +0000`).
+
+**Categories** are dynamic and reflect current coverage — commonly `Industry`, `Tools`, `Research`, `Startups`, `Regulation`, `Models`, `Open Source`.
 
 ### `GET /api/articles/{slug}` — single article
 
@@ -77,7 +82,7 @@ curl "https://whatstrending.ai/api/articles?category=Tools&limit=2"
 curl "https://whatstrending.ai/api/articles/openai-is-bringing-on-some-big-guns-in-the-lead-up-to-its-ipo"
 ```
 
-Returns one article object in `{ "success": true, "data": { ... } }`. Returns `404` with `{ "success": false }` if the slug doesn't exist.
+Returns one article object in `{ "success": true, "data": { ... } }`. Returns `404` with `{ "success": false, "error": "Article not found" }` if the slug doesn't exist.
 
 ### `GET /api/models` — AI model leaderboard
 
@@ -95,18 +100,53 @@ curl "https://whatstrending.ai/api/models?limit=1"
   "data": [
     {
       "rank": 1,
-      "name": "Claude Opus 4.6 (Thinking)",
-      "provider": "Anthropic",
-      "score": 1506,
-      "pricing": "$5/$25",
+      "name": "DeepSeek V4 Flash",
+      "provider": "DeepSeek",
+      "score": 4676,
+      "scoreDisplay": "4.68T",
+      "tokens": 4676449991973,
+      "requests": 362209743,
+      "pricing": "$0.09/$0.18",
       "context": "1M",
-      "category": "Proprietary",
+      "category": "Open Source",
       "change": "0",
-      "or": "anthropic/claude-opus-4.6"
+      "or": "deepseek/deepseek-v4-flash"
     }
   ]
 }
 ```
+
+The leaderboard is ranked by real OpenRouter usage. `tokens` is the trailing-window token volume routed to the model, `requests` is the request count, and `scoreDisplay` is the human-readable form of `score` (e.g. `"4.68T"`). `pricing` is `$in/$out` per million tokens and `or` is the OpenRouter model id.
+
+### `GET /api/models/{id}` — single model
+
+Look up one model by **id**. The `{id}` is the **name slugified** — lowercased with spaces replaced by hyphens (e.g. `DeepSeek V4 Flash` → `deepseek-v4-flash`). It is **not** the `or`/OpenRouter id; passing that (which contains a `/`) will not match.
+
+```bash
+curl "https://whatstrending.ai/api/models/deepseek-v4-flash"
+```
+
+```json
+{
+  "success": true,
+  "data": {
+    "rank": 1,
+    "name": "DeepSeek V4 Flash",
+    "provider": "DeepSeek",
+    "score": 4676,
+    "scoreDisplay": "4.68T",
+    "tokens": 4676449991973,
+    "requests": 362209743,
+    "pricing": "$0.09/$0.18",
+    "context": "1M",
+    "category": "Open Source",
+    "change": "0",
+    "or": "deepseek/deepseek-v4-flash"
+  }
+}
+```
+
+Returns `404` with `{ "success": false, "error": "Model not found" }` if no model matches the slug.
 
 ### `GET /api/most-read` — most-read articles
 
@@ -115,10 +155,18 @@ curl "https://whatstrending.ai/api/most-read"
 ```
 
 ```json
-{ "success": true, "data": [ { "slug": "android-17-launches-with-...", "views": 10 } ] }
+{
+  "success": true,
+  "data": [
+    { "slug": "laid-off-oracle-workers-tried-to-negotiate-better-severance-oracle-said-no", "views": 10 },
+    { "slug": "my-yard-is-dying-so-i-made-an-app-for-that", "views": 10 }
+  ]
+}
 ```
 
-### `GET /api/awesome-data` — trending AI tools
+Each entry is `{ slug, views }`, ordered by views. Use the `slug` with `GET /api/articles/{slug}` to fetch the full article.
+
+### `GET /api/awesome-data` — trending AI tools, comparisons & models
 
 ```bash
 curl "https://whatstrending.ai/api/awesome-data"
@@ -126,15 +174,47 @@ curl "https://whatstrending.ai/api/awesome-data"
 
 ```json
 {
-  "generatedAt": "2026-06-19T10:05:13.386Z",
+  "generatedAt": "2026-06-21T01:46:39.887Z",
   "site": "https://whatstrending.ai",
   "tools": [
-    { "name": "Cursor", "tagline": "The AI-first code editor", "description": "..." }
+    {
+      "name": "Cursor",
+      "tagline": "The AI-first code editor",
+      "description": "AI-powered code editor built on VS Code with deep integration for code generation, editing, and chat.",
+      "url": "https://cursor.com",
+      "category": "coding",
+      "pricing": "freemium"
+    }
+  ],
+  "comparisons": [
+    { "a": "ChatGPT", "b": "Claude", "slug": "chatgpt-vs-claude" }
+  ],
+  "models": [
+    {
+      "rank": 1,
+      "name": "DeepSeek V4 Flash",
+      "provider": "DeepSeek",
+      "score": 4676,
+      "scoreDisplay": "4.68T",
+      "tokens": 4676449991973,
+      "requests": 362209743,
+      "pricing": "$0.09/$0.18",
+      "context": "1M",
+      "category": "Open Source",
+      "change": "0",
+      "or": "deepseek/deepseek-v4-flash"
+    }
   ]
 }
 ```
 
-> Note: `/api/awesome-data` returns `{ generatedAt, site, tools }` directly (not the `{ success, data }` envelope used by the other endpoints).
+This endpoint returns three collections:
+
+- **`tools`** — curated AI tools, each with `name`, `tagline`, `description`, `url`, `category`, and `pricing` (e.g. `free`, `freemium`, `paid`).
+- **`comparisons`** — head-to-head pairs, each `{ a, b, slug }`. The `slug` maps to a comparison page (e.g. `/compare/chatgpt-vs-claude`).
+- **`models`** — the same model objects as `GET /api/models` (same 12-field schema).
+
+> Note: `/api/awesome-data` returns `{ generatedAt, site, tools, comparisons, models }` directly (not the `{ success, data }` envelope used by the other endpoints).
 
 ---
 
@@ -150,6 +230,20 @@ Most endpoints use a consistent envelope:
 ## CORS
 
 All responses send `Access-Control-Allow-Origin: *`, so you can call the API directly from the browser.
+
+## For AI agents / machine-readable
+
+Beyond the JSON API, the site exposes static, machine-readable surfaces meant for LLMs, agents, and feed readers:
+
+| Surface | Format | What it is |
+|---------|--------|------------|
+| [`/llms.txt`](https://whatstrending.ai/llms.txt) | text | LLM-friendly site summary and intent → page map |
+| [`/news.md`](https://whatstrending.ai/news.md) | Markdown | Latest AI news, summarized, with source links |
+| [`/models.md`](https://whatstrending.ai/models.md) | Markdown | Model leaderboard as a Markdown table |
+| [`/feed.xml`](https://whatstrending.ai/feed.xml) | RSS 2.0 | News feed for RSS readers |
+| [`/sitemap.xml`](https://whatstrending.ai/sitemap.xml) | XML | Full sitemap |
+
+These are great if you want a quick, parse-free snapshot without hitting the JSON endpoints.
 
 ## Fair use
 
