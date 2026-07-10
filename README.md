@@ -32,7 +32,13 @@ Beyond JSON, key pages ship as clean `text/markdown` (CORS enabled, no key) — 
 - [`/news.md`](https://whatstrending.ai/news.md) — recent headlines with sources and links.
 - [`/compare/{slug}.md`](https://whatstrending.ai/compare/chatgpt-vs-claude.md) — any comparison page as markdown.
 
-Also new on the site: the [Daily AI Pulse](https://whatstrending.ai/pulse) briefing (top stories, model movers, rising repos, funding — archived per day) and [rising repos](https://whatstrending.ai/repos) with week-over-week star velocity from stored daily snapshots.
+Also on the site, built from the same tracked data:
+
+- [Daily AI Pulse](https://whatstrending.ai/pulse) — daily briefing (top stories, model movers, rising repos, funding), archived per day.
+- [Rising repos](https://whatstrending.ai/repos) — week-over-week star velocity from stored daily snapshots.
+- [Model Release Radar](https://whatstrending.ai/models/new) — new models as they appear on OpenRouter, with launch pricing and early adoption.
+- [AI Market Share](https://whatstrending.ai/market-share) — provider share of real token volume over time.
+- Trending AI Repo badge — if your repo is on the trending index, embed it: `[![Trending AI Repo](https://whatstrending.ai/badge/repo/OWNER/NAME.svg)](https://whatstrending.ai/repos/OWNER/NAME)`
 
 ## Base URL
 
