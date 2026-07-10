@@ -18,11 +18,21 @@ curl "https://whatstrending.ai/api/articles?limit=3"
 ## What you get
 
 - **AI news feed** — fresh, summarized, categorized AI/tech news, each linking back to the original source.
-- **AI model leaderboard** — live rankings of frontier models with scores, pricing, and context windows.
+- **AI model leaderboard** — live rankings ranked by real OpenRouter token volume, with live pricing and context windows.
 - **Trending AI tools** — a curated, auto-updated list of notable AI tools.
 - **Most-read** — what people are actually reading right now.
 
 All read-only `GET` endpoints. No authentication, CORS enabled, JSON responses.
+
+## Machine-readable pages (markdown mirrors)
+
+Beyond JSON, key pages ship as clean `text/markdown` (CORS enabled, no key) — ideal for AI agents:
+
+- [`/models.md`](https://whatstrending.ai/models.md) — the usage leaderboard as a markdown table.
+- [`/news.md`](https://whatstrending.ai/news.md) — recent headlines with sources and links.
+- [`/compare/{slug}.md`](https://whatstrending.ai/compare/chatgpt-vs-claude.md) — any comparison page as markdown.
+
+Also new on the site: the [Daily AI Pulse](https://whatstrending.ai/pulse) briefing (top stories, model movers, rising repos, funding — archived per day) and [rising repos](https://whatstrending.ai/repos) with week-over-week star velocity from stored daily snapshots.
 
 ## Base URL
 
