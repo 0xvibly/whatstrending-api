@@ -29,12 +29,9 @@ All read-only `GET` endpoints. No authentication, CORS enabled, JSON responses.
 Beyond JSON, key pages ship as clean `text/markdown` (CORS enabled, no key) — ideal for AI agents:
 
 - [`/models.md`](https://whatstrending.ai/models.md) — the usage leaderboard as a markdown table.
-- [`/news.md`](https://whatstrending.ai/news.md) — recent headlines with sources and links.
-- [`/compare/{slug}.md`](https://whatstrending.ai/compare/chatgpt-vs-claude.md) — any comparison page as markdown.
 
 Also on the site, built from the same tracked data:
 
-- [Daily AI Pulse](https://whatstrending.ai/pulse) — daily briefing (top stories, model movers, rising repos, funding), archived per day.
 - [Rising repos](https://whatstrending.ai/repos) — week-over-week star velocity from stored daily snapshots.
 - [Model Release Radar](https://whatstrending.ai/models/new) — new models as they appear on OpenRouter, with launch pricing and early adoption.
 - [AI Market Share](https://whatstrending.ai/market-share) — provider share of real token volume over time.
@@ -139,7 +136,7 @@ The leaderboard is ranked by real OpenRouter usage. `tokens` is the trailing-win
 Look up one model by **id**. The `{id}` is the **name slugified** — lowercased with spaces replaced by hyphens (e.g. `DeepSeek V4 Flash` → `deepseek-v4-flash`). It is **not** the `or`/OpenRouter id; passing that (which contains a `/`) will not match.
 
 ```bash
-curl "https://whatstrending.ai/api/models/deepseek-v4-flash"
+curl "https://whatstrending.ai/api/models/hy4-preview"
 ```
 
 ```json
@@ -182,7 +179,7 @@ curl "https://whatstrending.ai/api/most-read"
 
 Each entry is `{ slug, views }`, ordered by views. Use the `slug` with `GET /api/articles/{slug}` to fetch the full article.
 
-### `GET /api/awesome-data` — trending AI tools, comparisons & models
+### `GET /api/awesome-data` — trending AI tools & models
 
 ```bash
 curl "https://whatstrending.ai/api/awesome-data"
@@ -201,9 +198,6 @@ curl "https://whatstrending.ai/api/awesome-data"
       "category": "coding",
       "pricing": "freemium"
     }
-  ],
-  "comparisons": [
-    { "a": "ChatGPT", "b": "Claude", "slug": "chatgpt-vs-claude" }
   ],
   "models": [
     {
@@ -224,13 +218,12 @@ curl "https://whatstrending.ai/api/awesome-data"
 }
 ```
 
-This endpoint returns three collections:
+This endpoint returns two collections:
 
 - **`tools`** — curated AI tools, each with `name`, `tagline`, `description`, `url`, `category`, and `pricing` (e.g. `free`, `freemium`, `paid`).
-- **`comparisons`** — head-to-head pairs, each `{ a, b, slug }`. The `slug` maps to a comparison page (e.g. `/compare/chatgpt-vs-claude`).
 - **`models`** — the same model objects as `GET /api/models` (same 12-field schema).
 
-> Note: `/api/awesome-data` returns `{ generatedAt, site, tools, comparisons, models }` directly (not the `{ success, data }` envelope used by the other endpoints).
+> Note: `/api/awesome-data` returns `{ generatedAt, site, tools, models }` directly (not the `{ success, data }` envelope used by the other endpoints).
 
 ---
 
@@ -254,7 +247,6 @@ Beyond the JSON API, the site exposes static, machine-readable surfaces meant fo
 | Surface | Format | What it is |
 |---------|--------|------------|
 | [`/llms.txt`](https://whatstrending.ai/llms.txt) | text | LLM-friendly site summary and intent → page map |
-| [`/news.md`](https://whatstrending.ai/news.md) | Markdown | Latest AI news, summarized, with source links |
 | [`/models.md`](https://whatstrending.ai/models.md) | Markdown | Model leaderboard as a Markdown table |
 | [`/feed.xml`](https://whatstrending.ai/feed.xml) | RSS 2.0 | News feed for RSS readers |
 | [`/sitemap.xml`](https://whatstrending.ai/sitemap.xml) | XML | Full sitemap |
