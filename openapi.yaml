@@ -150,14 +150,14 @@ paths:
                         views: { type: integer }
   /api/awesome-data:
     get:
-      summary: Trending AI tools, comparisons & models
+      summary: Trending AI tools & models
       description: >
         Returns three collections directly (not the { success, data } envelope):
-        curated tools, head-to-head comparisons, and the model leaderboard.
+        curated tools and the model leaderboard.
       operationId: awesomeData
       responses:
         "200":
-          description: Curated AI tools, comparisons, and models
+          description: Curated AI tools and models
           content:
             application/json:
               schema:
@@ -168,9 +168,6 @@ paths:
                   tools:
                     type: array
                     items: { $ref: "#/components/schemas/Tool" }
-                  comparisons:
-                    type: array
-                    items: { $ref: "#/components/schemas/Comparison" }
                   models:
                     type: array
                     items: { $ref: "#/components/schemas/Model" }
@@ -227,9 +224,3 @@ components:
         url: { type: string, format: uri }
         category: { type: string }
         pricing: { type: string, description: "e.g. free, freemium, paid" }
-    Comparison:
-      type: object
-      properties:
-        a: { type: string, description: "First tool/model in the comparison" }
-        b: { type: string, description: "Second tool/model in the comparison" }
-        slug: { type: string, description: "Comparison page slug, e.g. chatgpt-vs-claude" }
